@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Регистрация</title>
+    <meta charset="utf-8" />
+</head>
+<body>
+    <h1>Введите данные</h1>
+    <form action="/register" method="get" name="registerForm">
+        <label>Имя</label></br>
+        <input type="text" name="userName" /></br></br>
+        <label>Пароль</label></br>
+        <input type="text" name="password" /></br></br>
+        <label>Токен</label></br>
+        <input type="text" name="token" /></br></br>
+        <input type="submit" value="Пользователи" />
+    </form>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script>
+        $("form").submit(function(e) {
+            e.preventDefault();
+            var registerForm = document.forms["registerForm"];
+            var name = registerForm.elements["userName"].value;
+            var password = registerForm.elements["password"].value;
+            var token = registerForm.elements["token"].value;
+            $.ajax({
+                type: "GET",
+                url: "/users",
+                data: {name, password, token},
+                success: function(data){ 
+                    console.log(data);
+                    },
+                });
+        });
+    </script>
+</body>
+<html>

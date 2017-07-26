@@ -1,0 +1,27 @@
+{
+  "name": "authorization-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NicolaiV/JWT-node-ReactJS.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NicolaiV/JWT-node-ReactJS/issues"
+  },
+  "homepage": "https://github.com/NicolaiV/JWT-node-ReactJS#readme",
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "body-parser": "^1.17.2",
+    "eslint": "4.3.0",
+    "express": "4.15.3",
+    "jsonwebtoken": "7.4.1",
+    "mongoose": "^4.11.4"
+  }
+}

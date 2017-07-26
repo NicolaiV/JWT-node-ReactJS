@@ -1,0 +1,4 @@
+{
+  "secret": "123321444rfasd",
+  "database": "mongodb://localhost:27017/authorization-test"
+}
