@@ -1,6 +1,20 @@
 /*TODO: 
   Cекретный ключ рандомно генерировать при создании каждого токена и писать в БД;
+  Хешировать пароль
+  Сверять данные из токена с данными пользователя
+  Подключить сетевую БД
+  Использовать линтер
+  Перечетсть стаьи по теме и реализовать средства защиты
   Комментировать
+  Промисы и async/awaitПромисы и async/await
+  
+  Таким образом существуют следующие сущности
+  блок данных 1 - видим всегда
+  блок данных 2 - видим только аутентифицированным пользователям
+  кнопка входа - видна только не аутентифицированным пользователя
+  кнопка регистрации - видна только не аутентифицированным пользователя
+  кнопка выхода - видна только аутентифицированным пользователя
+  
 */
 
 const express = require('express'); //фреймворк
@@ -8,10 +22,10 @@ const bodyParser = require('body-parser'); //модуль для парсинг�
 const jwt = require('jsonwebtoken'); //модуль для работы с jwt
 const config = require('./config');
 const bluebird = require('bluebird');
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 Promise = bluebird;
 mongoose.Promise = bluebird;
-var User = require('./models/user'); // get our mongoose model
+const User = require('./models/user'); // get our mongoose model
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -26,15 +40,12 @@ app.get('/', function(req, res) {
     res.send('Hello! The API is at http://localhost:' + port + '/api');
 });
 
-var fs = require('fs');
+const fs = require('fs');
+
 
 app.post('/add_user', function(req, res) {
   if(!req.body) return res.sendStatus(400);
-  var user = { 
-    name: req.body.name,
-    password: req.body.password
-  };
-   var user = new User({ 
+   const user = new User({ 
     name: req.body.name,
     password: req.body.password
   });
@@ -57,21 +68,21 @@ app.post('/authenticate', function(req, res) {
       if (user.password != req.body.password) {
         res.json({ success: false, message: 'Authentication failed. Wrong password.' });
       } else {
-        var token = jwt.sign(user, app.get('superSecret'), {
+        const token = jwt.sign(user, app.get('superSecret'), {
           expiresIn: 1440 // expires in 24 hours
         });
         res.json({
           success: true,
           message: 'Enjoy your token!',
-          token: token
+          token
         });
       }   
     }
   });
-});   
+});
 
 app.use(function(req, res, next) {
-  var token = req.body.token || req.query.token || req.headers['x-access-token'];
+  const token = req.body.token || req.query.token || req.headers['x-access-token'];
   if (token) {
     jwt.verify(token, app.get('superSecret'), function(err, decoded) {      
       if (err) {
@@ -89,7 +100,7 @@ app.use(function(req, res, next) {
   }
 });
 
-app.get('/users', function(req, res) {
+app.get('/data', function(req, res) {
   User.find({}, function(err, users) {
     res.json(users);
   });
