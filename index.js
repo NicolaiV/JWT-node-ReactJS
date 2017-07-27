@@ -6,14 +6,7 @@
   Использовать линтер
   Перечетсть стаьи по теме и реализовать средства защиты
   Комментировать
-  Промисы и async/awaitПромисы и async/await
-  
-  Таким образом существуют следующие сущности
-  блок данных 1 - видим всегда
-  блок данных 2 - видим только аутентифицированным пользователям
-  кнопка входа - видна только не аутентифицированным пользователя
-  кнопка регистрации - видна только не аутентифицированным пользователя
-  кнопка выхода - видна только аутентифицированным пользователя
+  Промисы и async/await Промисы и async/await
   
 */
 
@@ -42,18 +35,26 @@ app.get('/', function(req, res) {
 
 const fs = require('fs');
 
+//User.collection.drop();
+
 
 app.post('/add_user', function(req, res) {
-  if(!req.body) return res.sendStatus(400);
-   const user = new User({ 
-    name: req.body.name,
-    password: req.body.password
-  });
-   user.save(function(err) {
-    if (err) throw err;
-    console.log('User saved successfully');
-    res.json({ success: true });
-  });
+  User.findOne({name: req.body.name}, (err, finded) => {
+	  if (finded) {
+		  res.json({ success: false, message:'Пользователь с таким именем уже существует'})
+		  return;
+	  }
+	  if(!req.body) return res.sendStatus(400);
+	   const user = new User({ 
+		name: req.body.name,
+		password: req.body.password
+	  });
+	   user.save(function(err) {
+		if (err) throw err;
+		console.log('User saved successfully');
+		res.json({ success: true });
+	  });
+  })
 });
 
 
@@ -102,9 +103,10 @@ app.use(function(req, res, next) {
 
 app.get('/data', function(req, res) {
   User.find({}, function(err, users) {
-    res.json(users);
+    res.json({ success: true, value: [{'Некие даннные':'секретные данные'}]});
   });
 });   
+
 
 app.listen(port);
 console.log('Приложение запущено на http://localhost:' + port);
