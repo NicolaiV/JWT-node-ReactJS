@@ -178,8 +178,7 @@ const Data = React.createClass({
            res.push(<p key={i}> {i + ': ' + item[i]} </p> )
         }
         return <div key={index} className='article'>{res}</div>
-      })}    
-      <button onClick={() => window.ee.emit('DataUpdate')}>Обновить данные</button>
+      })}
     </div>
     
   }
