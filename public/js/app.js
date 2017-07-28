@@ -1,5 +1,4 @@
 'use strict';
-let token = undefined;
 
 /**
  * Регистрация пользователя
@@ -34,7 +33,7 @@ function authorization(name, password, callback) {
   xhr.setRequestHeader('Content-Type', 'application/json');
   xhr.onload = function() {
     const data = JSON.parse(this.responseText);
-    token = data.token;
+    localStorage["token"] = data.token;
     callback(0, data);
   }
   xhr.onerror = function() {
@@ -51,8 +50,8 @@ function authorization(name, password, callback) {
   const XHR = ("onload" in new XMLHttpRequest()) ? XMLHttpRequest : XDomainRequest;
   const xhr = new XHR();
   xhr.open('GET', '/data', true);
-  if (token) {
-    xhr.setRequestHeader('x-access-token', token);
+  if (localStorage["token"]) {
+    xhr.setRequestHeader('x-access-token', localStorage["token"]);
   }
   xhr.onload = function() {
     const data = JSON.parse(this.responseText);
@@ -74,7 +73,7 @@ const AuthenticationAndRegistration = React.createClass({
   componentDidMount: function() {
     const self = this;
     window.ee.addListener('disconnect', function() {
-      token = undefined;
+      localStorage["token"] = undefined;
       self.setState({hasLogin: false})
       window.ee.emit('DataUpdate');
     });
@@ -85,7 +84,7 @@ const AuthenticationAndRegistration = React.createClass({
   self: this,
   getInitialState: function() {
     return {
-      hasLogin: token !== undefined,
+      hasLogin: localStorage["token"] !== undefined && localStorage["token"] !== 'undefined',
       nameIsEmpty: true,
       passwordIsEmpty: true
     };
@@ -99,8 +98,11 @@ const AuthenticationAndRegistration = React.createClass({
     const name = ReactDOM.findDOMNode(this.refs.name).value
     const password = ReactDOM.findDOMNode(this.refs.password).value
     registration(name, password, (code, data) => {
-      if (data.success === false)
+      if (data.success === false) {
         alert(data.message)
+	  } else {
+        alert(`Пользователь ${name} успешно зарегистрирован`)
+	  }
     })
   },
   authorization: function(e) {
@@ -115,6 +117,7 @@ const AuthenticationAndRegistration = React.createClass({
           passwordIsEmpty: true
         })
         window.ee.emit('DataUpdate');
+        alert(`Вы вошли как пользователь ${name}`)
       } else {
         alert(data.message)
       }
