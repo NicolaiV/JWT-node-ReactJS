@@ -1,7 +1,6 @@
-
 const User = require('./models/user'); // get our mongoose model
 const fs = require('fs'); // модуль файловой системы
-const jwt = require('jsonwebtoken'); // модуль для работы с jwt
+const tokenInterface = require('./token'); // интерфейс для работы с токеном
 let app = null;
 let logger = null;
 
@@ -16,7 +15,7 @@ function checkToken(req, res, next) {
   logger.info('Проверка токена');
   const token = req.headers['x-access-token'];
   if (token && token!=='undefined') {
-    jwt.verify(token, app.get('superSecret'), (err, decoded) => {
+    tokenInterface.verify(token, app.get('superSecret'), (err, decoded) => {
       if (err) {
         if (err.name === 'TokenExpiredError') {
           logger.info('Токен устарел');
@@ -46,7 +45,7 @@ function addUser(req, res) {
   User.findOne({ name: req.body.name }, (err, found) => {
     if (err) throw err;
     if (found) {
-	  const message = `Пользователь ${req.body.name} уже существует`;
+      const message = `Пользователь ${req.body.name} уже существует`;
       logger.info(message);
       return res.json({ success: false, message });
     }
@@ -56,7 +55,7 @@ function addUser(req, res) {
       password: req.body.password,
     });
     return user.save((err) => {
-	  const message = `Пользователь ${req.body.name} успешно создан`;
+      const message = `Пользователь ${req.body.name} успешно создан`;
       if (err) throw err;
       logger.info(message);
       res.json({ success: true, message });
@@ -73,18 +72,18 @@ function authorization(req, res) {
   }, (err, user) => {
     if (err) throw err;
     if (!user) {
-	  const message = `Авторизация невозможна. Пользователь ${req.body.name} не найден`;
+      const message = `Авторизация невозможна. Пользователь ${req.body.name} не найден`;
       logger.info(message);
       res.json({ success: false, message });
     } else if (user) {
       // проверка пароля
       if (!user.checkPassword(req.body.password)) {
-	    const message = 'Авторизация невозможна. Неверный пароль';
+        const message = 'Авторизация невозможна. Неверный пароль';
         logger.info(message);
         res.json({ success: false, message: message });
       } else {
         // генерация токена
-        const token = jwt.sign(user, app.get('superSecret'), {
+        const token = tokenInterface.sign(user, app.get('superSecret'), {
           expiresIn: 86400, // сутки, в секундах
         });
         res.json({
