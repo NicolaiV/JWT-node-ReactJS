@@ -109,7 +109,11 @@ const AuthenticationAndRegistration = React.createClass({
     const password = ReactDOM.findDOMNode(this.refs.password).value;
     authorization(name, password, (code, data) => {
       if(data.success) {
-        this.setState({hasLogin: true})
+        this.setState({
+          hasLogin: true,
+          nameIsEmpty: true,
+          passwordIsEmpty: true
+        })
         window.ee.emit('DataUpdate');
       } else {
         alert(data.message)

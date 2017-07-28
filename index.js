@@ -32,7 +32,7 @@ app.use((req, res, next) => {
     jwt.verify(token, app.get('superSecret'), (err, decoded) => {
       if (err) {
         if (err.name === 'TokenExpiredError') {
-          return res.json({ success: false, message: 'Токен не валиден. Повторите авторизацию.' });
+          return res.json({ success: false, message: 'Токен устарел. Повторите авторизацию.' });
         } else {
           next(); 
         }
@@ -51,9 +51,9 @@ app.use((req, res, next) => {
 // добавление нового пользователя к БД
 app.post('/add_user', (req, res) => {
   // проверка наличия пользователя с таким же именем
-  User.findOne({ name: req.body.name }, (err, finded) => {
+  User.findOne({ name: req.body.name }, (err, found) => {
     if (err) throw err;
-    if (finded) {
+    if (found) {
       return res.json({ success: false, message: 'Пользователь с таким именем уже существует.' });
     }
     // создание и запись пользователя в БД
