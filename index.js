@@ -7,9 +7,12 @@ const config = require('./config'); // конфиг файл
 const mongoose = require('mongoose');// интерфейс базы данных
 const fs = require('fs'); // модуль файловой системы
 const User = require('./models/user'); // get our mongoose model
+const bluebird = require('bluebird'); // модуль для промисов
 
 const app = express();
 const port = process.env.PORT || 8080; // установка порта
+
+mongoose.Promise = bluebird;
 
 mongoose.Promise = Promise;
 
@@ -28,7 +31,11 @@ app.use((req, res, next) => {
   if (token) {
     jwt.verify(token, app.get('superSecret'), (err, decoded) => {
       if (err) {
-        next();
+        if (err.name === 'TokenExpiredError') {
+          return res.json({ success: false, message: 'Токен не валиден. Повторите авторизацию.' });
+        } else {
+          next(); 
+        }
       } else {
         // когда токен не содержит ошибок, его декодированное значение прикрепляется к объекту req,
         // который будет передаваться дальше
@@ -93,7 +100,7 @@ app.get('/data', (req, res) => {
   const authorization = req.decoded !== undefined;
   let value = [];
   // данные берутся из файла data.json
-  fs.readFile('./data.json', (err, data) => {
+  fs.readFile('./data/data.json', (err, data) => {
     if (err) {
       return res.json({ success: false, message: 'Ошибка чтения данных.' });
     }

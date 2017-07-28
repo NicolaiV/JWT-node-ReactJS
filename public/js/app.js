@@ -51,10 +51,16 @@ function authorization(name, password, callback) {
   const XHR = ("onload" in new XMLHttpRequest()) ? XMLHttpRequest : XDomainRequest;
   const xhr = new XHR();
   xhr.open('GET', '/data', true);
-  xhr.setRequestHeader('x-access-token', token);
+  if (token) {
+    xhr.setRequestHeader('x-access-token', token);
+  }
   xhr.onload = function() {
     const data = JSON.parse(this.responseText);
-    callback(0, data);
+    if (!data.success) {
+      alert(data.message);
+      window.ee.emit('disconnect');
+    }
+    callback(0, data)
   }
   xhr.onerror = function() {
     callback(1);
@@ -62,32 +68,31 @@ function authorization(name, password, callback) {
   xhr.send();
 }
 
-/**
- * Удаление значения токена и отключение автоиизации
- * @param callback
- */
- function disconnect(callback) {
-  token = undefined;
-  callback(0);
-}
-
 window.ee = new EventEmitter();
 
 const AuthenticationAndRegistration = React.createClass({
+  componentDidMount: function() {
+    const self = this;
+    window.ee.addListener('disconnect', function() {
+      token = undefined;
+      self.setState({hasLogin: false})
+      window.ee.emit('DataUpdate');
+    });
+  },
+  componentWillUnmount: function() {
+    window.ee.removeListener('disconnect');
+  },
   self: this,
   getInitialState: function() {
     return {
-      hasLogin: token !== undefined
+      hasLogin: token !== undefined,
+      nameIsEmpty: true,
+      passwordIsEmpty: true
     };
   },
   exit: function(e) {
     e.preventDefault();
-    disconnect((code) => {
-      // сбросить токен и обновить данные
-      this.setState({hasLogin: false})
-      token = undefined;
-      window.ee.emit('DataUpdate');
-    })
+    window.ee.emit('disconnect');
   },
   registration: function(e) {
     e.preventDefault();
@@ -111,7 +116,16 @@ const AuthenticationAndRegistration = React.createClass({
       }
     })
   },
+  onFieldChange: function(fieldName, e) {
+    if (e.target.value.trim().length > 0) {
+      this.setState({[''+fieldName]:false})
+    } else {
+      this.setState({[''+fieldName]:true})
+    }
+  },
   render: function() {
+    let nameIsEmpty = this.state.nameIsEmpty;
+    let passwordIsEmpty = this.state.passwordIsEmpty;
     const hasLogin = this.state.hasLogin;
     let authTemp;
     // эта часть интерфейса меняет вид, в зависимости от того, пройдена ли авторизация
@@ -128,16 +142,18 @@ const AuthenticationAndRegistration = React.createClass({
             type='text'
             className='add__text'
             placeholder='Ваше имя'
+            onChange={this.onFieldChange.bind(this, 'nameIsEmpty')}
             ref='name'
           />
           <input
             type='text'
             className='add__text'
             placeholder='Ваш пароль'
+            onChange={this.onFieldChange.bind(this, 'passwordIsEmpty')}
             ref='password'
           />
-          <button onClick={this.registration}>Регистрация</button>
-          <button onClick={this.authorization}>Авторизация</button>
+          <button onClick={this.registration} disabled={nameIsEmpty || passwordIsEmpty}>Регистрация</button>
+          <button onClick={this.authorization}  disabled={nameIsEmpty || passwordIsEmpty}>Авторизация</button>
         </div>
     }
     return <div>{authTemp}</div>
@@ -149,14 +165,16 @@ const Data = React.createClass({
   render: function() {
     const data = this.props.data;
     return <div>
-    {data.map((item, index) => {
+      {data.map((item, index) => {
         const res = []
         for(let i in item) {
            res.push(<p key={i}> {i + ': ' + item[i]} </p> )
         }
         return <div key={index} className='article'>{res}</div>
-    })}
+      })}    
+      <button onClick={() => window.ee.emit('DataUpdate')}>Обновить данные</button>
     </div>
+    
   }
 });
 
