@@ -1,4 +1,4 @@
-const User = require('./models/user'); // get our mongoose model
+const User = require('./models/user'); // модель базы данных
 const fs = require('fs'); // модуль файловой системы
 const tokenInterface = require('./token'); // интерфейс для работы с токеном
 const logger = require('./logger'); // модуль логгера

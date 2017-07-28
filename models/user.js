@@ -1,8 +1,8 @@
-const mongoose = require('mongoose'); // интерфейс БД
+const bd = require('../bd'); // интерфейс БД
 const crypto = require('crypto'); // модуль шифрования
 
 // схема записи пользователя
-const userSchema = new mongoose.Schema({
+const userSchema = new bd.mongoose.Schema({
   // имя пользователя должно быть уникальным
   name: {
     type: String,
@@ -28,4 +28,4 @@ userSchema.methods.checkPassword = function (password) {
   return crypto.pbkdf2Sync(password, this.salt, 1, 128, 'sha1').toString() === this.passwordHash;
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = bd.mongoose.model('User', userSchema);
