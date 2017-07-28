@@ -34,6 +34,7 @@ function authorization(name, password, callback) {
   xhr.onload = function() {
     const data = JSON.parse(this.responseText);
     localStorage["token"] = data.token;
+    localStorage["name"] = name;
     callback(0, data);
   }
   xhr.onerror = function() {
@@ -74,6 +75,7 @@ const AuthenticationAndRegistration = React.createClass({
     const self = this;
     window.ee.addListener('disconnect', function() {
       localStorage["token"] = undefined;
+      localStorage["name"] = '';
       self.setState({hasLogin: false})
       window.ee.emit('DataUpdate');
     });
@@ -86,7 +88,8 @@ const AuthenticationAndRegistration = React.createClass({
     return {
       hasLogin: localStorage["token"] !== undefined && localStorage["token"] !== 'undefined',
       nameIsEmpty: true,
-      passwordIsEmpty: true
+      passwordIsEmpty: true,
+      name: localStorage["name"]
     };
   },
   exit: function(e) {
@@ -100,9 +103,9 @@ const AuthenticationAndRegistration = React.createClass({
     registration(name, password, (code, data) => {
       if (data.success === false) {
         alert(data.message)
-	  } else {
+      } else {
         alert(`Пользователь ${name} успешно зарегистрирован`)
-	  }
+      }
     })
   },
   authorization: function(e) {
@@ -114,7 +117,8 @@ const AuthenticationAndRegistration = React.createClass({
         this.setState({
           hasLogin: true,
           nameIsEmpty: true,
-          passwordIsEmpty: true
+          passwordIsEmpty: true,
+          name
         })
         window.ee.emit('DataUpdate');
         alert(`Вы вошли как пользователь ${name}`)
@@ -134,6 +138,7 @@ const AuthenticationAndRegistration = React.createClass({
     let nameIsEmpty = this.state.nameIsEmpty;
     let passwordIsEmpty = this.state.passwordIsEmpty;
     const hasLogin = this.state.hasLogin;
+    const name = this.state.name;
     let authTemp;
     // эта часть интерфейса меняет вид, в зависимости от того, пройдена ли авторизация
     if (hasLogin) {
@@ -141,6 +146,7 @@ const AuthenticationAndRegistration = React.createClass({
       authTemp =
         <div className='add cf'>
           <button onClick={this.exit}>Выход</button>
+          <b>  {name}</b>
         </div>
     } else {
       authTemp =

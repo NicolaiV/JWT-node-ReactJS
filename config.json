@@ -1,4 +1,5 @@
 {
   "secret": "123321444rfasd",
-  "database": "mongodb://localhost:27017/authorization-test"
+  "database": "mongodb://localhost:27017/authorization-test",
+  "port": 8080
 }
